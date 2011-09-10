@@ -2,10 +2,21 @@ import dice
 import system
 
 class Space:
+    subspaceLabels = ['A', 'B', 'C', 'D']
     def __init__(self, coordinates = [0, 0]):
         self.coordinates = coordinates
         self.density = "Standard"
         self.settlement = "Standard"
+
+    def setDensity(self, density):
+        self.density = density
+        for i in self.subSpaces:
+            i.setDensity(density)
+
+    def setSettlement(self, settlement):
+        self.settlement = settlement
+        for i in self.subSpaces:
+            i.setSettlement(settlement)
 
     def getCoordinates(self):
         return self.coordinates
@@ -27,6 +38,8 @@ class Space:
             roll = mydice.roll(1, 6)
             if self.density == "Scattered":
                 dm = -1
+            elif self.density == "Sparse":
+                dm = -2
             elif self.density == "Dense":
                 dm = +1
             else:
@@ -51,7 +64,21 @@ class Space:
                         map[index].append(x)
                 index += 1
         return map
-            
+
+    def drawDotMap(self):
+        map = self.generateDotMap()
+        for row in map:
+            rowstr = " ".join(row)
+            print rowstr
+ 
+    def getSubspace(self, queery):
+        if queery in self.__class__.subspaceLabels:
+            index = self.__class__.subspaceLabels.index(queery)
+        elif queery >= 0 and queery <= 3:
+            index = queery
+        else:
+            return None
+        return self.subSpaces[index]
 
 class Subsector(Space):
     def __init__(self, coordinates = [0, 0]):
@@ -61,10 +88,13 @@ class Subsector(Space):
         """
         A subsector has no subSpaces
         """
+        self.subSpaces = []
         self.density = "Standard"
         self.settlement = "Standard"
 
     def generate(self):
+        del self.systems
+        self.systems = []
         for x in range(self.size[0]):
             for y in range(self.size[1]):
                 if self.systemPresence():
@@ -106,10 +136,10 @@ class Sector(Space):
         self.size = [32, 40]
         self.coordinates = coordinates
         self.subSpaces = []
-        self.subSpaces.append(Quadrant([0, 0]))
-        self.subSpaces.append(Quadrant([16, 0]))
-        self.subSpaces.append(Quadrant([0, 20]))
-        self.subSpaces.append(Quadrant([16, 20]))
+        self.subSpaces.append(Quadrant([self.coordinates[0] + 0, self.coordinates[1] + 0]))
+        self.subSpaces.append(Quadrant([self.coordinates[0] + 16, self.coordinates[1] + 0]))
+        self.subSpaces.append(Quadrant([self.coordinates[0] + 0, self.coordinates[1] + 20]))
+        self.subSpaces.append(Quadrant([self.coordinates[0] + 16, self.coordinates[1] + 20]))
 
 class Domain(Space):
     def __init__(self, coordinates = [0, 0]):
@@ -124,6 +154,7 @@ class Domain(Space):
         self.subSpaces.append(Sector([self.coordinates[0] + 32, self.coordinates[1] + 0]))
         self.subSpaces.append(Sector([self.coordinates[0] + 0, self.coordinates[1] + 40]))
         self.subSpaces.append(Sector([self.coordinates[0] + 32, self.coordinates[1] + 40]))
+            
 
 
 
