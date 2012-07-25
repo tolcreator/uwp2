@@ -7,6 +7,7 @@ class Space:
         self.coordinates = coordinates
         self.density = "Standard"
         self.settlement = "Standard"
+        self.name = "Default"
 
     def setDensity(self, density):
         self.density = density
@@ -65,6 +66,10 @@ class Space:
                 index += 1
         return map
 
+    def show(self):
+        for i in self.subSpaces:
+            i.show()
+
     def drawDotMap(self):
         map = self.generateDotMap()
         for row in map:
@@ -118,8 +123,13 @@ class Subsector(Space):
         for i in self.systems:
             x = i.getCoordinates()[0] - self.coordinates[0]
             y = i.getCoordinates()[1] - self.coordinates[1]
-            map[y][x] = 'X'
+            map[y][x] = i.getStarport()
         return map
+
+    def show(self):
+        print "%d Systems:" % len(self.systems)
+        for x in self.systems:
+            x.show() 
 
 class Quadrant(Space):
     def __init__(self, coordinates = [0, 0]):
