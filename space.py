@@ -88,13 +88,15 @@ class Space:
     def getFileName(self):
         return self.name + ".sec"
 
-    def save(self, filename="myspace.txt"):
+    def save(self, filename=None):
+        if not filename:
+            filename = self.getFileName()
         FILE = open(filename, "w")
         self.appendToFile(FILE)
         FILE.close()
 
     def appendToFile(self, FILE):
-        FILE.write("#" + self.__class__.__name__ + ":"+ self.name + ":%d subspaces\n" % len(self.subSpaces))
+        FILE.write("#" + self.__class__.__name__ + ":"+ self.name + ":at %02d%02d" % (self.coordinates[0], self.coordinates[1]) + ":%d subspaces\n" % len(self.subSpaces))
         for i in self.subSpaces:
             i.appendToFile(FILE)
        
@@ -146,7 +148,7 @@ class Subsector(Space):
             print x.getString() 
 
     def appendToFile(self, FILE):
-        FILE.write("#" + self.__class__.__name__ + ":" + self.name + "\n")
+        FILE.write("#" + self.__class__.__name__ + ":" + self.name + ":at %02d%02d" % (self.coordinates[0], self.coordinates[1]) + "\n")
         for x in self.systems:
             FILE.write(x.getString() + "\n")
         
