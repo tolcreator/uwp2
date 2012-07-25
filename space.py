@@ -99,6 +99,16 @@ class Space:
         FILE.write("#" + self.__class__.__name__ + ":"+ self.name + ":at %02d%02d" % (self.coordinates[0], self.coordinates[1]) + ":%d subspaces\n" % len(self.subSpaces))
         for i in self.subSpaces:
             i.appendToFile(FILE)
+
+    def load(self, filename=None):
+        if not filename:
+            filename = self.getFileName()
+        FILE = open(filename, "r")
+        lines = FILE.readlines()
+        FILE.close()
+        descriptor = lines[0]
+        print descriptor
+
        
 class Subsector(Space):
     def __init__(self, coordinates = [0, 0], name="Default Subsector"):
@@ -148,7 +158,7 @@ class Subsector(Space):
             print x.getString() 
 
     def appendToFile(self, FILE):
-        FILE.write("#" + self.__class__.__name__ + ":" + self.name + ":at %02d%02d" % (self.coordinates[0], self.coordinates[1]) + "\n")
+        FILE.write("#" + self.__class__.__name__ + ":" + self.name + ":at %02d%02d" % (self.coordinates[0], self.coordinates[1]) + ":%d systems\n" % (len(self.systems)))
         for x in self.systems:
             FILE.write(x.getString() + "\n")
         
@@ -190,6 +200,25 @@ class Domain(Space):
         self.subSpaces.append(Sector([self.coordinates[0] + 32, self.coordinates[1] + 40]))
         self.name = name
             
+def load(filename):
+    FILE = open(filename, "r")
+    lines = FILE.readlines()
+    FILE.close()
+    """ Get descriptor for this space """
+    descriptor = lines[0].lstrip("#")
+    properties = descriptor.split(":")
+    spaceType = properties[0]
+    name = properties[1]
+    coords = properties[2].lstrip("at ")
+    contents = properties[3].rstrip("\n")
+    if (contents.find("subspaces") >= 0):
+        numSubspaces = contents.rstrip(" subspaces")
+        print "sub spaces: " + numSubspaces
+    else:
+        numSubspaces = 0
+        numSystems = contents.rstrip(" systems")
+        print "systems" + numSystems
+    
 
 
 
