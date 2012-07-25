@@ -672,8 +672,8 @@ class Uwp:
         else:
             return False
 
-    def show(self):
-        print self.sec()
+    def getString(self):
+        return self.sec()
 
     def sec(self):
         trades = " ".join(self.tradeCodes)

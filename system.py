@@ -13,8 +13,8 @@ class System:
     def getCoordinates(self):
         return self.coordinates
 
-    def show(self):
-        return self.uwp.show()
+    def getString(self):
+        return self.uwp.getString()
 
     def getStarport(self):
         return self.uwp.getStarport()

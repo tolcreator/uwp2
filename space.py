@@ -3,11 +3,11 @@ import system
 
 class Space:
     subspaceLabels = ['A', 'B', 'C', 'D']
-    def __init__(self, coordinates = [0, 0]):
+    def __init__(self, coordinates = [0, 0], name = "Default"):
         self.coordinates = coordinates
         self.density = "Standard"
         self.settlement = "Standard"
-        self.name = "Default"
+        self.name = name
 
     def setDensity(self, density):
         self.density = density
@@ -85,8 +85,21 @@ class Space:
             return None
         return self.subSpaces[index]
 
+    def getFileName(self):
+        return self.name + ".sec"
+
+    def save(self, filename="myspace.txt"):
+        FILE = open(filename, "w")
+        self.appendToFile(FILE)
+        FILE.close()
+
+    def appendToFile(self, FILE):
+        FILE.write("#" + self.name + "\n")
+        for i in self.subSpaces:
+            i.appendToFile(FILE)
+       
 class Subsector(Space):
-    def __init__(self, coordinates = [0, 0]):
+    def __init__(self, coordinates = [0, 0], name="Default"):
         self.size = [8, 10]
         self.coordinates = coordinates
         self.systems = []
@@ -96,6 +109,7 @@ class Subsector(Space):
         self.subSpaces = []
         self.density = "Standard"
         self.settlement = "Standard"
+        self.name = name
 
     def generate(self):
         del self.systems
@@ -129,7 +143,13 @@ class Subsector(Space):
     def show(self):
         print "%d Systems:" % len(self.systems)
         for x in self.systems:
-            x.show() 
+            print x.getString() 
+
+    def appendToFile(self, FILE):
+        FILE.write("#" + self.name + "\n")
+        for x in self.systems:
+            FILE.write(x.getString() + "\n")
+        
 
 class Quadrant(Space):
     def __init__(self, coordinates = [0, 0]):
