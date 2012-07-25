@@ -94,12 +94,12 @@ class Space:
         FILE.close()
 
     def appendToFile(self, FILE):
-        FILE.write("#" + self.name + "\n")
+        FILE.write("#" + self.__class__.__name__ + ":"+ self.name + ":%d subspaces\n" % len(self.subSpaces))
         for i in self.subSpaces:
             i.appendToFile(FILE)
        
 class Subsector(Space):
-    def __init__(self, coordinates = [0, 0], name="Default"):
+    def __init__(self, coordinates = [0, 0], name="Default Subsector"):
         self.size = [8, 10]
         self.coordinates = coordinates
         self.systems = []
@@ -146,13 +146,13 @@ class Subsector(Space):
             print x.getString() 
 
     def appendToFile(self, FILE):
-        FILE.write("#" + self.name + "\n")
+        FILE.write("#" + self.__class__.__name__ + ":" + self.name + "\n")
         for x in self.systems:
             FILE.write(x.getString() + "\n")
         
 
 class Quadrant(Space):
-    def __init__(self, coordinates = [0, 0]):
+    def __init__(self, coordinates = [0, 0], name="Default Quadrant"):
         self.size = [16, 20]
         self.coordinates = coordinates
         self.subSpaces = []
@@ -160,9 +160,10 @@ class Quadrant(Space):
         self.subSpaces.append(Subsector([self.coordinates[0] + 8, self.coordinates[1] + 0]))
         self.subSpaces.append(Subsector([self.coordinates[0] + 0, self.coordinates[1] + 10]))
         self.subSpaces.append(Subsector([self.coordinates[0] + 8, self.coordinates[1] + 10]))
+        self.name = name
 
 class Sector(Space):
-    def __init__(self, coordinates = [0, 0]):
+    def __init__(self, coordinates = [0, 0], name="Default Sector"):
         self.size = [32, 40]
         self.coordinates = coordinates
         self.subSpaces = []
@@ -170,9 +171,10 @@ class Sector(Space):
         self.subSpaces.append(Quadrant([self.coordinates[0] + 16, self.coordinates[1] + 0]))
         self.subSpaces.append(Quadrant([self.coordinates[0] + 0, self.coordinates[1] + 20]))
         self.subSpaces.append(Quadrant([self.coordinates[0] + 16, self.coordinates[1] + 20]))
+        self.name = name
 
 class Domain(Space):
-    def __init__(self, coordinates = [0, 0]):
+    def __init__(self, coordinates = [0, 0], name="Default Domain"):
         self.size = [64, 80]
         """
         Domain coordinates are the sector coordinates of the first (Coreward Spinward)
@@ -184,6 +186,7 @@ class Domain(Space):
         self.subSpaces.append(Sector([self.coordinates[0] + 32, self.coordinates[1] + 0]))
         self.subSpaces.append(Sector([self.coordinates[0] + 0, self.coordinates[1] + 40]))
         self.subSpaces.append(Sector([self.coordinates[0] + 32, self.coordinates[1] + 40]))
+        self.name = name
             
 
 
