@@ -681,8 +681,12 @@ class Uwp:
         for star in self.stars:
             starStrings.append(star.getString());
         starString = " ".join(starStrings)
-        ret = "%-18s %02d%02d %c%c%c%c%c%c%c-%c %c %-14s %c  %c%c%c %-2s %-20s" % (
-                self.name, self.coordinates[0], self.coordinates[1], 
+        if len(self.coordinates) == 3:
+            coords = "%02d%02d%02d" % (self.coordinates[0], self.coordinates[1], self.coordinates[2])
+        else:
+            coords = "%02d%02d" % (self.coordinates[0], self.coordinates[1])
+        ret = "%-18s %s %c%c%c%c%c%c%c-%c %c %-14s %c  %c%c%c %-2s %-20s" % (
+                self.name, coords,
                 self.starport.getHex(), self.size.getHex(), self.atmosphere.getHex(), 
                 self.hydrosphere.getHex(), self.population.getHex(), self.government.getHex(), 
                 self.law.getHex(), self.tech.getHex(), 
