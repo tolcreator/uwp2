@@ -315,8 +315,8 @@ class PopulationMultiplier(Element):
     hexes = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
     def generate(self):
         mydice = dice.Dice()
-        roll = dice.roll(1, 10)
-        return self.__class__.hexes[roll - 1]
+        roll = dice.roll(1, 9)
+        return self.__class__.hexes[roll]
 
 class GasGiants(Element):
     hexes = ['0', '1', '2', '3', '4', '5']

@@ -3,12 +3,15 @@ import system
 import pickle
 
 class Space:
-    subspaceLabels = ['A', 'B', 'C', 'D']
     def __init__(self, coordinates = [0, 0], name = "Default"):
         self.coordinates = coordinates
         self.density = "Standard"
         self.settlement = "Standard"
         self.name = name
+        self.dimensions = 2
+
+    def getDimensions(self):
+        return self.dimensions
 
     def setDensity(self, density):
         self.density = density
@@ -26,6 +29,38 @@ class Space:
     def generate(self):
         for i in self.subSpaces:
             i.generate()
+
+    def show(self):
+        for i in self.subSpaces:
+            i.show()
+
+    def getSubspace(self, queery):
+        if queery in self.__class__.subspaceLabels:
+            index = self.__class__.subspaceLabels.index(queery)
+        elif queery >= 0 and queery <= len(self.__class__.subspaceLabels):
+            index = queery
+        else:
+            return None
+        return self.subSpaces[index]
+
+    def getFileName(self):
+        return self.name + ".sec"
+
+    def save(self, filename=None):
+        FILE = open(filename, "w")
+        pickle.dump(self, FILE)
+        FILE.close()
+
+
+class Space2D(Space):
+    subspaceLabels = ['A', 'B', 'C', 'D']
+
+    def __init__(self, coordinates = [0, 0], name = "Default"):
+        self.coordinates = coordinates
+        self.density = "Standard"
+        self.settlement = "Standard"
+        self.name = name
+        self.dimensions = 2
 
     def systemPresence(self):
         mydice = dice.Dice()
@@ -67,34 +102,22 @@ class Space:
                 index += 1
         return map
 
-    def show(self):
-        for i in self.subSpaces:
-            i.show()
-
     def drawDotMap(self):
         map = self.generateDotMap()
         for row in map:
             rowstr = " ".join(row)
             print rowstr
- 
-    def getSubspace(self, queery):
-        if queery in self.__class__.subspaceLabels:
-            index = self.__class__.subspaceLabels.index(queery)
-        elif queery >= 0 and queery <= 3:
-            index = queery
-        else:
-            return None
-        return self.subSpaces[index]
 
-    def getFileName(self):
-        return self.name + ".sec"
+class Space3D(Space):
+    subspaceLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+    def __init__(self, coordinates = [0, 0, 0], name = "Default"):
+        self.coordinates = coordinates
+        self.density = "Standard"
+        self.settlement = "Standard"
+        self.name = name 
+        self.dimensions = 3
 
-    def save(self, filename=None):
-        FILE = open(filename, "w")
-        pickle.dump(self, FILE)
-        FILE.close()
-       
-class Subsector(Space):
+class Subsector(Space2D):
     def __init__(self, coordinates = [0, 0], name="Default Subsector"):
         self.size = [8, 10]
         self.coordinates = coordinates
