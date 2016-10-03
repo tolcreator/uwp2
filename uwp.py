@@ -14,7 +14,7 @@ class Element:
     def getHex(self):
         return self.hex
 
-    def get_value(self):
+    def getValue(self):
         return self.__class__.hexes.index(self.hex)
 
     def set(self, hex):
@@ -24,12 +24,34 @@ class Element:
 class Starport(Element):
     hexes = ['A', 'B', 'C', 'D', 'E', 'X']
 
-    def __init__(self, settlement="Standard"):
-        self.hex = self.generate(settlement)
+    def __init__(self, population, settlement="Standard", version="Classic"):
+        if version == "HardScience":
+            self.hex = self.generateHardScience(settlement, population)
+        elif version == "MongooseTwo":
+            self.hex = self.generateMongooseTwo(settlement, population)
+        else:
+            self.hex = self.generate(settlement, 0)
 
-    def generate(self, settlement):
+    def generateHardScience(self, settlement, population):
+        dm = population.getValue() - 7
+        return self.generate(settlement, dm) 
+
+    def generateMongooseTwo(self, settlement, population):
+        dm = 0
+        if population.getHex() in ['0', '1', '2']:
+            dm = -2
+        elif population.getHex() in ['3', '4']:
+            dm = -1
+        elif population.getHex() in ['8', '9']:
+            dm = 1
+        elif population.getHex() in ['A', 'B']:
+            dm = 2
+        return self.generate(settlement, dm)
+
+    def generate(self, settlement, dm):
         mydice = dice.Dice()
         roll = mydice.roll(2, 6)
+        roll = roll + dm
         if settlement == "Backwater":
             return self.generateBackwater(roll)
         elif settlement == "Mature":
@@ -103,31 +125,44 @@ class Size(Element):
 class Atmosphere(Element):
     hexes = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C']
     
-    def __init__(self, size):
-        self.hex = self.generate(size)
+    def __init__(self, size, version="Standard"):
+        self.hex = self.generate(size, version)
 
-    def generate(self, size):
+    def generate(self, size, version):
         if size.getHex() == '0':
             return '0'
-        dm = size.get_value()
+        dm = size.getValue()
         mydice = dice.Dice()
         roll = mydice.roll(2, 6) - 7 + dm
         if roll >= len(self.__class__.hexes):
             return self.__class__.hexes[-1]
         if roll < 0:
             return '0'
+
+        """ Modify roll based on version """
+        if version in ["HardScience", "SpaceOpera"]:
+            if size.getHex() in ['0', '1', '2']:
+                return '0'
+            elif size.getHex() in ['3', '4']:
+                if roll in [0, 1, 2]:
+                    roll = 0
+                elif roll in [3, 4, 5]:
+                    roll = 1
+                else:
+                    roll = 10
+
         return self.__class__.hexes[roll]
 
 class Hydrosphere(Element):
      hexes = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A']
 
-     def __init__(self, size, atmosphere):
-         self.hex = self.generate(size, atmosphere)
+     def __init__(self, size, atmosphere, version="Standard"):
+         self.hex = self.generate(size, atmosphere, version)
 
-     def generate(self, size, atmosphere):
+     def generate(self, size, atmosphere, version):
          if size.getHex() == '0':
             return '0'
-         dm = atmosphere.get_value()
+         dm = atmosphere.getValue()
          if atmosphere.getHex() <= '1' and atmosphere.getHex() >= 'A':
             dm -= 4
          mydice = dice.Dice()
@@ -136,10 +171,46 @@ class Hydrosphere(Element):
              return self.__class__.hexes[-1]
          if roll < 0:
              return '0'
+
+         """ Modify roll based on version """
+         if version in ["HardScience", "SpaceOpera"]:
+            if size.getHex() in ['3', '4'] and atmosphere.getHex() == 'A':
+                roll = roll - 6
+            if atmosphere.getHex() in ['0', '1']:
+                roll = roll - 6
+            if atmosphere.getHex() in ['2', '3', 'B', 'C']:
+                roll = roll - 4
+            if roll < 0:
+                roll = 0
+
          return self.__class__.hexes[roll]
 
 class Population(Element):
     hexes = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A']
+
+    def __init__(self, version="Standard", size='7', atmosphere='6'):
+        if version == "HardScience":
+            self.hex = self.generateHardScience(size, atmosphere)
+        else:
+            self.hex = self.generate()
+
+    def generateHardScience(self, size, atmosphere):
+        dm = 0
+        if size.getHex() in ['0', '1', '2']:
+            dm = dm - 1
+        if size.getHex() == 'A':
+            dm = dm - 1
+        if atmosphere.getHex() not in ['5', '6', '8']:
+            dm = dm - 1
+        else:
+            dm = dm + 1
+        mydice = dice.Dice()
+        roll = mydice.roll(2, 6) - 2 + dm
+        if roll < 0:
+            roll = 0
+        if roll > 10:
+            roll = 10
+        return self.__class__.hexes[roll]
 
 class Government(Element):
     hexes = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D']
@@ -148,7 +219,7 @@ class Government(Element):
         self.hex = self.generate(population)
 
     def generate(self, population):
-        dm = population.get_value()
+        dm = population.getValue()
         mydice = dice.Dice()
         roll = mydice.roll(2, 6) - 7 + dm
         if roll >= len(self.__class__.hexes):
@@ -164,7 +235,7 @@ class Law(Element):
         self.hex = self.generate(government)
 
     def generate(self, government):
-        dm = government.get_value()
+        dm = government.getValue()
         mydice = dice.Dice()
         roll = mydice.roll(2, 6) - 7 + dm
         if roll >= len(self.__class__.hexes):
@@ -493,14 +564,14 @@ class Companion(Star):
         return self.isFar
 
 class Uwp:
-    def __init__(self, coordinates=[0, 0], name="Default", settlement="Standard", allegience="Im"):
+    def __init__(self, coordinates=[0, 0], name="Default", settlement="Standard", allegience="Im", version="Standard"):
         self.name = name
         self.coordinates = coordinates
-        self.starport = Starport(settlement)
         self.size = Size()
-        self.atmosphere = Atmosphere(self.size)
-        self.hydrosphere = Hydrosphere(self.size, self.atmosphere)
-        self.population = Population()
+        self.atmosphere = Atmosphere(self.size, version=version)
+        self.hydrosphere = Hydrosphere(self.size, self.atmosphere, version=version)
+        self.population = Population(version=version, size=self.size, atmosphere=self.atmosphere)
+        self.starport = Starport(self.population, settlement, version)
         self.government = Government(self.population)
         self.law = Law(self.government)
         self.tech = Tech(self.starport, self.size, self.atmosphere, self.hydrosphere, self.population, self.government)
